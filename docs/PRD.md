@@ -212,13 +212,13 @@ QuoteSync 내비게이션
 
 ### NotionIntegration (노션 연동 정보)
 
-| 필드              | 설명                                 | 타입/관계 |
-| ----------------- | ------------------------------------ | --------- |
-| id                | 고유 식별자                          | UUID      |
-| user_id           | 소유 운영자                          | → User.id |
-| integration_token | 노션 Integration Token (암호화 저장) | string    |
-| database_id       | 연동된 노션 데이터베이스 ID          | string    |
-| is_active         | 연동 활성 여부                       | boolean   |
+| 필드              | 설명                                                               | 타입/관계 |
+| ----------------- | ------------------------------------------------------------------ | --------- |
+| id                | 고유 식별자                                                        | UUID      |
+| user_id           | 소유 운영자                                                        | → User.id |
+| integration_token | 노션 Integration Token (암호화 저장)                               | string    |
+| data_source_id    | 연동된 노션 데이터 소스 ID (구 `database_id`, Notion SDK 최신 API) | string    |
+| is_active         | 연동 활성 여부                                                     | boolean   |
 
 ### Quote (견적서 공유 링크)
 
@@ -238,37 +238,64 @@ QuoteSync 내비게이션
 
 ### 프론트엔드 프레임워크
 
-- **Next.js 15** (App Router) - React 풀스택 프레임워크
-- **TypeScript 5.6+** - 타입 안전성 보장
-- **React 19** - UI 라이브러리 (최신 동시성 기능)
+- **Next.js 16.2.2** (App Router + Turbopack) - React 풀스택 프레임워크
+  - `cacheComponents` (PPR + useCache + dynamicIO 통합)
+  - `connection()` API (런타임 환경변수 보장)
+- **TypeScript 5.1+** - 타입 안전성 보장
+- **React 19.1+** - UI 라이브러리 (최신 동시성 기능)
+- **Node.js 20.9+ LTS** - Next.js 16 최소 요건
 
 ### 스타일링 및 UI
 
 - **TailwindCSS v4** (설정파일 없는 새로운 엔진) - 유틸리티 CSS 프레임워크
-- **shadcn/ui** - 고품질 React 컴포넌트 라이브러리
+- **shadcn/ui** (new-york style) - 고품질 React 컴포넌트 라이브러리
+- **Radix UI Primitives** - 접근성 표준 UI 프리미티브
 - **Lucide React** - 아이콘 라이브러리
 
 ### 폼 및 검증
 
 - **React Hook Form 7.x** - 폼 상태 관리
-- **Zod** - 스키마 검증 라이브러리
+- **Zod 4** - 스키마 검증 라이브러리 (서버/클라이언트 공유)
+- **Server Actions** - 폼 제출 처리
 
 ### 백엔드 및 데이터베이스
 
 - **Supabase** - BaaS (인증, 데이터베이스, Row Level Security)
-- **PostgreSQL** - 관계형 데이터베이스 (Supabase 포함)
+  - `@supabase/ssr` - Next.js App Router 공식 SSR 클라이언트
+  - `@supabase/supabase-js` - JavaScript SDK
+- **PostgreSQL** - 관계형 데이터베이스 (Supabase 호스팅)
+- **Drizzle ORM** - 타입 세이프 ORM (`drizzle-orm/supabase` 헬퍼 포함)
+  - `drizzle-kit` - 마이그레이션 도구 (`prefix: 'supabase'` 옵션)
+  - `postgres` - Postgres 드라이버
+
+### 클라이언트 상태 관리
+
+- **TanStack Query v5** (`@tanstack/react-query@5.90.3`) - 서버 상태 캐싱
+  - Server Components와 `HydrationBoundary` 통합
+  - 견적서 목록 새로고침에 활용
 
 ### 외부 API 연동
 
-- **Notion API (공식 SDK `@notionhq/client`)** - 노션 데이터베이스 및 페이지 데이터 조회
+- **Notion API (공식 SDK `@notionhq/client`)** - 노션 데이터 소스 및 페이지 조회
+  - ⚠️ Notion SDK 최신 버전은 `databases.query` → **`dataSources.query`로 변경됨**
+  - `data_source_id` 파라미터 사용 (이전 `database_id`)
 
 ### PDF 생성
 
-- **Puppeteer** 또는 **react-pdf** - 뷰어 HTML을 PDF로 변환
+- **`@react-pdf/renderer`** - React 컴포넌트 기반 PDF 생성
+  - `renderToBuffer` - Next.js Route Handler 응답에 활용
+  - `renderToStream` - 대용량 견적서 스트리밍 다운로드
 
 ### 배포 및 호스팅
 
-- **Vercel** - Next.js 15 최적화 배포 플랫폼
+- **Vercel** - Next.js 16 최적화 배포 플랫폼
+- **Vercel Analytics** + **Speed Insights** (선택) - 성능 모니터링
+
+### 개발 도구
+
+- **ESLint 9** + **Prettier 3** - 코드 품질
+- **Husky + lint-staged** - Git hooks
+- **Vitest** + **Playwright** (테스트 도입 시 권장)
 
 ### 패키지 관리
 

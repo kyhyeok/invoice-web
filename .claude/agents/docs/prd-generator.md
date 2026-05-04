@@ -82,7 +82,7 @@ model: sonnet
 ### 7. 기술 스택 (최신 버전 필수)
 
 - 상세한 기술 스택과 용도별 분류
-- **반드시 최신 버전 명시**: Next.js 15, React 19 등
+- **반드시 최신 버전 명시**: Next.js 16, React 19 등
 - Next.js 기반의 현대적 웹 개발 스택 권장
 
 ## 📋 출력 템플릿
@@ -236,29 +236,34 @@ model: sonnet
 
 ### 🎨 프론트엔드 프레임워크
 
-- **Next.js 15** (App Router) - React 풀스택 프레임워크
-- **TypeScript 5.6+** - 타입 안전성 보장
+- **Next.js 16** (App Router + Turbopack) - React 풀스택 프레임워크
+  - `cacheComponents` (PPR + useCache + dynamicIO 통합)
+  - `connection()` API (런타임 환경변수 보장)
+- **TypeScript 5.1+** - 타입 안전성 보장
 - **React 19** - UI 라이브러리 (최신 동시성 기능)
+- **Node.js 20.9+ LTS** - Next.js 16 최소 요건
 
 ### 🎨 스타일링 & UI
 
 - **TailwindCSS v4** (설정파일 없는 새로운 엔진) - 유틸리티 CSS 프레임워크
-- **shadcn/ui** - 고품질 React 컴포넌트 라이브러리
+- **shadcn/ui** (new-york style) - 고품질 React 컴포넌트 라이브러리
 - **Lucide React** - 아이콘 라이브러리
 
 ### 📝 폼 & 검증
 
 - **React Hook Form 7.x** - 폼 상태 관리
-- **Zod** - 스키마 검증 라이브러리
+- **Zod 4** - 스키마 검증 라이브러리
 
 ### 🗄️ 백엔드 & 데이터베이스
 
 - **Supabase** - BaaS (인증, 데이터베이스, 실시간 구독)
-- **PostgreSQL** - 관계형 데이터베이스 (Supabase 포함)
+  - `@supabase/ssr` - Next.js App Router 공식 SSR 클라이언트
+- **PostgreSQL** - 관계형 데이터베이스 (Supabase 호스팅)
+- **Drizzle ORM** (선택) - 타입세이프 ORM, `drizzle-orm/supabase` 헬퍼 제공
 
 ### 🚀 배포 & 호스팅
 
-- **Vercel** - Next.js 15 최적화 배포 플랫폼
+- **Vercel** - Next.js 16 최적화 배포 플랫폼
 
 ### 📦 패키지 관리
 
@@ -272,14 +277,14 @@ model: sonnet
 3. **즉시 개발 가능**: 개발자가 이 문서만 보고 바로 코딩 시작할 수 있는 수준
 4. **MVP 범위**: 프로젝트 성공에 반드시 필요한 최소 기능만 포함, 부가 기능은 MVP 이후로 연기
 5. **최대 2페이지**: A4 2페이지 분량 이내로 제한
-6. **최신 기술**: **반드시 현재 최신 버전** 명시 (Next.js 15, React 19 등)
+6. **최신 기술**: **반드시 현재 최신 버전** 명시 (Next.js 16, React 19 등)
 
 ## 🔧 기술 스택 선택 원칙
 
-- **최신 버전 필수**: Next.js 15, React 19, TailwindCSS v4 등 최신 버전 사용
-- **Next.js 15 기반**: 최신 App Router, 향상된 성능, React 19 지원
+- **최신 버전 필수**: Next.js 16, React 19, TailwindCSS v4 등 최신 버전 사용
+- **Next.js 16 기반**: cacheComponents, connection(), Turbopack 안정화
 - **TailwindCSS v4**: 설정 파일 없는 새로운 CSS 엔진 활용
-- **TypeScript**: 최신 타입 시스템으로 코드 안정성
+- **TypeScript 5.1+**: 최신 타입 시스템으로 코드 안정성
 - **Supabase**: 백엔드 인프라 최소화, 실시간 기능
 - **학습 곡선이 낮고 문서화가 잘 된 최신 기술** 우선
 - **커뮤니티가 활발하고 장기 지원되는 기술** 우선
@@ -288,10 +293,10 @@ model: sonnet
 
 **기술 스택 작성 시 반드시**:
 
-- Next.js 15 (현재 최신버전)
+- Next.js 16 (현재 최신버전, Node 20.9+ 필수)
 - React 19 (현재 최신버전)
 - TailwindCSS v4 (설정파일 없는 새로운 방식)
-- 각 기술의 최신 버전 확인 후 명시
+- 각 기술의 최신 버전 확인 후 명시 (Context7 MCP 활용 권장)
 
 ## 🔄 처리 프로세스 (정합성 보장)
 

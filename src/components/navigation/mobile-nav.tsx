@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator'
 const navItems = [
   { title: '홈', href: '/' },
   { title: '로그인', href: '/login' },
+  { title: '회원가입', href: '/signup' },
 ]
 
 interface MobileNavProps {

@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -21,7 +20,6 @@ export function LoginForm() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false,
   })
   const [errors, setErrors] = useState({
     email: '',
@@ -50,14 +48,12 @@ export function LoginForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validateForm()) {
-      console.log('로그인 데이터:', formData)
-      // 여기에 로그인 로직을 추가하세요
+      // TODO: Supabase 인증 로직 연결
     }
   }
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    // 입력 시 에러 초기화
     if (field === 'email' || field === 'password') {
       setErrors(prev => ({ ...prev, [field]: '' }))
     }
@@ -68,7 +64,7 @@ export function LoginForm() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-center text-2xl font-bold">로그인</CardTitle>
         <CardDescription className="text-center">
-          계정에 로그인하여 서비스를 이용하세요
+          QuoteSync에 로그인하세요
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -116,22 +112,6 @@ export function LoginForm() {
             {errors.password && (
               <p className="text-sm text-red-500">{errors.password}</p>
             )}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="rememberMe"
-              checked={formData.rememberMe}
-              onCheckedChange={checked =>
-                handleInputChange('rememberMe', checked === true)
-              }
-            />
-            <Label
-              htmlFor="rememberMe"
-              className="cursor-pointer text-sm font-normal"
-            >
-              로그인 상태 유지
-            </Label>
           </div>
 
           <Button type="submit" className="w-full">

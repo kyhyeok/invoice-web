@@ -1,6 +1,6 @@
-# Next.js 15.5.15 개발 지침
+# Next.js 16.2.2 개발 지침
 
-이 문서는 Claude Code에서 Next.js 15.5.15 프로젝트를 개발할 때 따라야 할 핵심 규칙과 가이드라인을 제공합니다.
+이 문서는 Claude Code에서 Next.js 16.2.2 프로젝트를 개발할 때 따라야 할 핵심 규칙과 가이드라인을 제공합니다.
 
 ## 🚀 필수 규칙 (엄격 준수)
 
@@ -56,7 +56,7 @@ export function InteractiveChart({ data }: { data: Analytics[] }) {
 ### 🔄 New: async request APIs 처리
 
 ```typescript
-// 🔄 Next.js 15.5.15 새로운 방식
+// 🔄 Next.js 15+ 비동기 방식 (Next.js 16에서도 동일)
 import { cookies, headers } from 'next/headers'
 
 export default async function Page({
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
 // ✅ 세밀한 캐시 제어
 export async function getProductData(id: string) {
   const data = await fetch(`/api/products/${id}`, {
-    // 🔄 Next.js 15.5.15 새로운 캐시 옵션
+    // 🔄 태그 기반 무효화 + revalidate
     next: {
       revalidate: 3600, // 1시간 캐시
       tags: [`product-${id}`, 'products'], // 태그 기반 무효화
@@ -510,4 +510,192 @@ npm run check-all
 npm run build
 ```
 
-이 지침을 따라 Next.js 15.5.15의 모든 기능을 최대한 활용하여 현대적이고 성능 최적화된 애플리케이션을 개발하세요.
+이 지침을 따라 Next.js 16.2.2의 모든 기능을 최대한 활용하여 현대적이고 성능 최적화된 애플리케이션을 개발하세요.
+
+---
+
+## 🆕 Next.js 16 핵심 신기능
+
+### 1. `cacheComponents` — PPR + useCache + dynamicIO 통합
+
+Next.js 15 canary의 `experimental.ppr` 플래그가 **`cacheComponents` 단일 옵션으로 통합**되었습니다.
+
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  // ✅ Partial Prerendering + useCache + dynamicIO 동시 활성화
+  cacheComponents: true,
+}
+
+export default nextConfig
+```
+
+**동작 방식**:
+
+- 정적인 부분은 빌드 타임에 미리 렌더링
+- 동적인 부분은 `<Suspense>` 경계 안에서 스트리밍
+- `'use cache'` 디렉티브로 함수/컴포넌트 단위 캐싱 가능
+
+```typescript
+// ✅ 'use cache' 디렉티브 활용
+async function getCachedQuotes(userId: string) {
+  'use cache'
+  return await db.quotes.findMany({ where: { userId } })
+}
+
+export default async function DashboardPage() {
+  return (
+    <div>
+      {/* 캐싱된 정적 부분 */}
+      <DashboardHeader />
+
+      {/* 동적 부분은 Suspense로 분리 */}
+      <Suspense fallback={<QuotesSkeleton />}>
+        <QuotesList />
+      </Suspense>
+    </div>
+  )
+}
+```
+
+### 2. `connection()` — 런타임 환경변수 보장
+
+빌드 타임에 환경변수가 번들링되는 것을 방지하여, Vercel 등에서 **런타임 시점에 환경변수를 읽도록** 강제합니다.
+
+```typescript
+import { connection } from 'next/server'
+
+export default async function Page() {
+  // 🔄 이 호출 이후의 코드는 항상 런타임에 실행됨
+  await connection()
+
+  // ✅ 런타임에 환경변수 안전하게 접근
+  const config = process.env.RUNTIME_CONFIG
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+
+  return <ConfigDisplay config={config} />
+}
+```
+
+**활용 시점**:
+
+- 시크릿 키, API 토큰 등 민감 정보
+- 환경별로 달라지는 설정값
+- Vercel 환경변수 (Preview/Production 분리)
+
+### 3. `PageProps` 헬퍼 — 타입 안전한 라우트 props
+
+`npx next typegen`을 통해 라우트별로 자동 생성된 타입 헬퍼를 사용할 수 있습니다.
+
+```typescript
+// ✅ 라우트 경로 기반 자동 타입 추론
+export default async function Page(props: PageProps<'/quote/[token]'>) {
+  const { token } = await props.params // ← 자동으로 { token: string } 타입
+  const search = await props.searchParams
+
+  return <QuoteViewer token={token} />
+}
+```
+
+**기존 방식과 비교**:
+
+```typescript
+// ❌ 기존: 수동으로 타입 작성
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ token: string }>
+}) {
+  const { token } = await params
+}
+
+// ✅ Next.js 16: typegen 활용
+export default async function Page(props: PageProps<'/quote/[token]'>) {
+  const { token } = await props.params
+}
+```
+
+### 4. Turbopack 안정화 (`build` 포함)
+
+Next.js 15에서 `dev`만 안정화되었던 Turbopack이 **16에서는 `build`까지 안정 버전으로 승격**되었습니다.
+
+```json
+{
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start"
+  }
+}
+```
+
+빌드 시간 **최대 5배 단축** (기존 webpack 대비).
+
+### 5. Node.js 런타임 정책 변경
+
+- **최소 Node.js: 20.9.0+** (Node 18 미지원)
+- **최소 TypeScript: 5.1.0+**
+- **브라우저 지원**: Chrome/Edge/Firefox 111+, Safari 16.4+
+
+```bash
+# 업그레이드 전 Node 버전 확인
+node --version  # v20.9.0 이상이어야 함
+```
+
+### 6. 비동기 미들웨어 정식화
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+// ✅ Next.js 16: 비동기 미들웨어 권장
+export async function middleware(request: NextRequest) {
+  // Supabase 세션 검증 등 비동기 작업 자연스럽게 처리
+  const session = await getSession(request)
+
+  if (!session && request.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+}
+```
+
+---
+
+## 📦 Next.js 15 → 16 마이그레이션 체크리스트
+
+업그레이드 시 확인할 항목:
+
+- [ ] **Node 20.9+** 설치 확인 (`node --version`)
+- [ ] **TypeScript 5.1+** 설치 확인 (`tsc --version`)
+- [ ] `next` 및 `eslint-config-next` 버전을 `16.2.2`로 업데이트
+- [ ] `experimental.ppr` 사용 중이면 `cacheComponents: true`로 변경
+- [ ] `cookies()`, `headers()` → `await cookies()`, `await headers()` (codemod 활용)
+- [ ] `params`, `searchParams` 모두 Promise 타입으로 변경
+- [ ] `npm run build` 성공 확인
+
+**자동 마이그레이션 명령**:
+
+```bash
+# 공식 codemod로 한 번에 마이그레이션
+npx @next/codemod@latest upgrade latest
+
+# 비동기 API만 변환
+npx @next/codemod@latest next-async-request-api .
+```
+
+---
+
+## 🔗 참조
+
+- Next.js 16 업그레이드 가이드: https://nextjs.org/docs/app/guides/upgrading/version-16
+- 공식 Codemod 목록: https://nextjs.org/docs/app/guides/upgrading/codemods
+- cacheComponents API: https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents

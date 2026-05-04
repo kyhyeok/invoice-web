@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'NextJS Starter - 모던 웹 스타터킷',
+  title: 'QuoteSync - 노션 견적서 공유 서비스',
   description:
-    'Next.js 15, TypeScript, TailwindCSS, ShadcnUI로 구축된 프로덕션 준비가 완료된 웹 애플리케이션 스타터킷',
+    '노션에서 작성한 견적서를 클라이언트에게 깔끔한 웹 뷰어와 PDF로 손쉽게 공유하세요.',
 }
 
 export default function RootLayout({
